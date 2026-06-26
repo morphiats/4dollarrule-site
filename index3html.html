@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Build-Along Tracker · The 4 Dollar Rule</title>
+<meta name="description" content="Track your $4 a day. Watch it become $1,460. The official companion tracker for The 4 Dollar Rule by Charlie Ware.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:wght@500;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B0F1E;
+    --navy-mid:#11172A;
+    --navy-light:#161E33;
+    --navy-border:#222C44;
+    --gold:#E8B84B;
+    --gold-bright:#FFD278;
+    --gold-dim:#5A4A20;
+    --cream:#F8F4EB;
+    --white:#FFFFFF;
+    --muted:#A09880;
+    --muted-dim:#6B6458;
+    --green:#5AB478;
+    --blue:#5A8CC8;
+    --red:#C86E5A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--navy);
+    color:var(--white);
+    font-family:'Work Sans',sans-serif;
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  .display{font-family:'Big Shoulders',sans-serif;font-weight:800;letter-spacing:-0.02em}
+
+  /* background texture */
+  .bg-dots{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:radial-gradient(circle, rgba(232,184,75,0.05) 1px, transparent 1px);
+    background-size:32px 32px;
+  }
+
+  .wrap{position:relative; z-index:1; max-width:760px; margin:0 auto; padding:0 24px 100px}
+
+  /* ── TOP BAR ── */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 0; border-bottom:1px solid var(--navy-border);
+    margin-bottom:8px;
+  }
+  .brand{
+    font-size:13px; letter-spacing:0.12em; color:var(--gold); font-weight:700;
+    text-transform:uppercase;
+  }
+  .topbar-actions{display:flex; gap:10px}
+  .pill-btn{
+    background:transparent; border:1px solid var(--navy-border); color:var(--muted);
+    font-family:'Work Sans',sans-serif; font-size:12px; font-weight:600;
+    padding:8px 16px; border-radius:20px; cursor:pointer; transition:all .15s;
+  }
+  .pill-btn:hover{border-color:var(--gold); color:var(--gold)}
+  .pill-btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+
+  /* ── HERO ── */
+  .hero{text-align:center; padding:56px 0 36px}
+  .hero-eyebrow{
+    font-size:12px; letter-spacing:0.18em; color:var(--muted); text-transform:uppercase;
+    margin-bottom:14px; font-weight:600;
+  }
+  .hero h1{font-size:clamp(30px,6vw,44px); line-height:1.08; margin-bottom:10px}
+  .hero h1 .g{color:var(--gold)}
+  .hero p{color:var(--muted); font-size:16px; max-width:480px; margin:0 auto}
+
+  /* ── SIGNATURE: progress ring ── */
+  .ring-wrap{
+    position:relative; width:280px; height:280px; margin:40px auto 8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .ring-wrap svg{position:absolute; inset:0; transform:rotate(-90deg)}
+  .ring-bg{fill:none; stroke:var(--navy-border); stroke-width:10}
+  .ring-fg{
+    fill:none; stroke:var(--gold); stroke-width:10; stroke-linecap:round;
+    transition:stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1);
+  }
+  .ring-center{position:relative; text-align:center}
+  .ring-amount{font-size:46px; color:var(--gold); display:block; line-height:1}
+  .ring-label{font-size:11px; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-top:6px; display:block}
+
+  .stat-row{
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:28px 0 8px;
+  }
+  .stat-card{
+    background:var(--navy-mid); border:1px solid var(--navy-border); border-radius:14px;
+    padding:16px 10px; text-align:center;
+  }
+  .stat-val{font-size:24px; color:var(--white); display:block}
+  .stat-val.gold{color:var(--gold)}
+  .stat-lbl{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:4px; display:block}
+
+  /* ── CHECK-IN BUTTON ── */
+  .checkin-wrap{text-align:center; margin:32px 0 48px}
+  .checkin-btn{
+    background:var(--gold); color:var(--navy); border:none;
+    font-family:'Work Sans',sans-serif; font-weight:700; font-size:16px;
+    padding:18px 44px; border-radius:40px; cursor:pointer;
+    transition:transform .12s, box-shadow .2s;
+    box-shadow:0 8px 24px rgba(232,184,75,0.25);
+  }
+  .checkin-btn:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(232,184,75,0.35)}
+  .checkin-btn:active{transform:translateY(0)}
+  .checkin-btn:disabled{
+    background:var(--navy-light); color:var(--muted); box-shadow:none; cursor:default; transform:none;
+  }
+  .checkin-btn:focus-visible{outline:2px solid var(--gold); outline-offset:3px}
+  .checkin-sub{margin-top:12px; font-size:13px; color:var(--muted)}
+
+  /* ── SECTION HEADERS ── */
+  .section{margin:56px 0}
+  .section-head{display:flex; align-items:baseline; gap:12px; margin-bottom:18px}
+  .section-num{font-size:13px; color:var(--gold-dim); font-weight:700}
+  .section-title{font-size:13px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  .section-rule{flex:1; height:1px; background:var(--navy-border)}
+
+  /* ── BUCKET PICKER ── */
+  .bucket-grid{display:grid; grid-template-columns:1fr; gap:10px}
+  .bucket-card{
+    background:var(--navy-mid); border:1px solid var(--navy-border); border-radius:14px;
+    padding:18px 20px; cursor:pointer; transition:all .15s; text-align:left;
+    display:flex; align-items:center; justify-content:space-between; width:100%;
+    font-family:'Work Sans',sans-serif; color:var(--white);
+  }
+  .bucket-card:hover{border-color:var(--muted-dim)}
+  .bucket-card.selected{border-color:var(--gold); background:rgba(232,184,75,0.06)}
+  .bucket-card:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  .bucket-name{font-size:16px; font-weight:700; margin-bottom:3px}
+  .bucket-desc{font-size:13px; color:var(--muted)}
+  .bucket-check{
+    width:22px; height:22px; border-radius:50%; border:2px solid var(--navy-border);
+    flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  }
+  .bucket-card.selected .bucket-check{border-color:var(--gold); background:var(--gold)}
+  .bucket-check svg{opacity:0; width:12px; height:12px}
+  .bucket-card.selected .bucket-check svg{opacity:1}
+
+  /* ── HEATMAP ── */
+  .heatmap-card{
+    background:var(--navy-mid); border:1px solid var(--navy-border); border-radius:14px; padding:22px;
+  }
+  .heatmap-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px}
+  .heatmap-head h3{font-size:15px; font-weight:600}
+  .heatmap-head span{font-size:12px; color:var(--muted)}
+  .heatmap-grid{
+    display:grid; grid-template-columns:repeat(15, 1fr); gap:5px;
+  }
+  .hm-cell{
+    aspect-ratio:1; border-radius:3px; background:var(--navy-light);
+    border:1px solid var(--navy-border);
+  }
+  .hm-cell.done{background:var(--gold); border-color:var(--gold)}
+  .hm-cell.today{box-shadow:0 0 0 2px var(--gold-bright)}
+  .heatmap-legend{display:flex; align-items:center; gap:8px; margin-top:14px; font-size:11px; color:var(--muted)}
+  .legend-box{width:10px; height:10px; border-radius:2px; background:var(--navy-light); border:1px solid var(--navy-border)}
+  .legend-box.on{background:var(--gold); border-color:var(--gold)}
+
+  /* ── MILESTONES ── */
+  .milestone-list{display:flex; flex-direction:column; gap:0}
+  .milestone{
+    display:flex; align-items:center; gap:16px; padding:14px 0;
+    border-bottom:1px solid var(--navy-border);
+  }
+  .milestone:last-child{border-bottom:none}
+  .ms-dot{
+    width:14px; height:14px; border-radius:50%; flex-shrink:0;
+    background:var(--navy-light); border:2px solid var(--navy-border);
+  }
+  .ms-dot.hit{background:var(--gold); border-color:var(--gold)}
+  .ms-day{font-size:14px; font-weight:700; min-width:78px}
+  .ms-amt{font-size:14px; color:var(--gold); min-width:70px}
+  .ms-note{font-size:13px; color:var(--muted); flex:1}
+  .ms-note.hit{color:var(--white)}
+
+  /* ── ACTION CHECKLIST ── */
+  .action-list{display:flex; flex-direction:column; gap:8px}
+  .action-item{
+    display:flex; align-items:flex-start; gap:14px;
+    background:var(--navy-mid); border:1px solid var(--navy-border); border-radius:12px;
+    padding:14px 16px; cursor:pointer;
+  }
+  .action-checkbox{
+    width:22px; height:22px; border-radius:6px; border:2px solid var(--navy-border);
+    flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center;
+    transition:all .15s;
+  }
+  .action-item.checked .action-checkbox{background:var(--gold); border-color:var(--gold)}
+  .action-checkbox svg{opacity:0; width:12px; height:12px}
+  .action-item.checked .action-checkbox svg{opacity:1}
+  .action-text{font-size:14px; color:var(--white)}
+  .action-item.checked .action-text{color:var(--muted); text-decoration:line-through}
+  .action-chapter{font-size:11px; color:var(--gold-dim); text-transform:uppercase; letter-spacing:0.06em; display:block; margin-bottom:3px}
+
+  /* ── BUCKET PROGRESS BAR for action checklist ── */
+  .progress-track{height:6px; background:var(--navy-border); border-radius:4px; overflow:hidden; margin:18px 0 8px}
+  .progress-fill{height:100%; background:var(--gold); border-radius:4px; transition:width .4s ease}
+  .progress-text{font-size:12px; color:var(--muted); text-align:center}
+
+  /* ── REFLECTION ── */
+  textarea{
+    width:100%; background:var(--navy-mid); border:1px solid var(--navy-border); border-radius:12px;
+    color:var(--white); font-family:'Work Sans',sans-serif; font-size:14px; padding:14px 16px;
+    resize:vertical; min-height:90px;
+  }
+  textarea:focus-visible{outline:2px solid var(--gold); outline-offset:1px}
+  textarea::placeholder{color:var(--muted-dim)}
+  .reflect-label{font-size:13px; color:var(--muted); margin-bottom:8px; display:block}
+
+  /* ── TOAST ── */
+  .toast{
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--gold); color:var(--navy); font-weight:700; font-size:14px;
+    padding:14px 28px; border-radius:30px; opacity:0; transition:all .3s ease;
+    pointer-events:none; z-index:50; white-space:nowrap;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+  /* ── FOOTER ── */
+  footer{
+    text-align:center; padding:48px 0 12px; border-top:1px solid var(--navy-border); margin-top:60px;
+  }
+  footer .book-cta{
+    display:inline-flex; align-items:center; gap:10px; background:var(--navy-mid);
+    border:1px solid var(--gold-dim); border-radius:30px; padding:10px 22px;
+    color:var(--gold); font-weight:600; font-size:13px; text-decoration:none; margin-bottom:20px;
+  }
+  footer p{font-size:12px; color:var(--muted-dim)}
+
+  @media (max-width:480px){
+    .heatmap-grid{grid-template-columns:repeat(10,1fr)}
+    .stat-row{gap:8px}
+    .ring-wrap{width:230px; height:230px}
+    .ring-amount{font-size:38px}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; scroll-behavior:auto !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-dots"></div>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">The 4 Dollar Rule</div>
+    <div class="topbar-actions">
+      <button class="pill-btn" id="exportBtn">Export</button>
+      <button class="pill-btn" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-eyebrow">The Build-Along Tracker</div>
+    <h1 class="display">Move $4. <span class="g">Watch it grow.</span></h1>
+    <p>Your companion to the book. Check in daily, pick your bucket, and watch $4 become $1,460 — one day at a time. Everything saves automatically on this device.</p>
+  </div>
+
+  <!-- SIGNATURE: progress ring -->
+  <div class="ring-wrap">
+    <svg width="280" height="280" viewBox="0 0 280 280">
+      <circle class="ring-bg" cx="140" cy="140" r="124"></circle>
+      <circle class="ring-fg" id="ringFg" cx="140" cy="140" r="124" stroke-dasharray="779" stroke-dashoffset="779"></circle>
+    </svg>
+    <div class="ring-center">
+      <span class="ring-amount display" id="totalAmount">$0</span>
+      <span class="ring-label" id="ringDays">0 of 365 days</span>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <span class="stat-val gold display" id="statStreak">0</span>
+      <span class="stat-lbl">Current Streak</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-val display" id="statBest">0</span>
+      <span class="stat-lbl">Best Streak</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-val display" id="statTotal">0</span>
+      <span class="stat-lbl">Total Days</span>
+    </div>
+  </div>
+
+  <div class="checkin-wrap">
+    <button class="checkin-btn" id="checkinBtn">Mark Today's $4</button>
+    <div class="checkin-sub" id="checkinSub">Tap to log today's move</div>
+  </div>
+
+  <!-- BUCKET PICKER -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <span class="section-title">Pick Your Bucket</span>
+      <div class="section-rule"></div>
+    </div>
+    <div class="bucket-grid" id="bucketGrid">
+      <button class="bucket-card" data-bucket="safe">
+        <div>
+          <div class="bucket-name">Safe</div>
+          <div class="bucket-desc">Savings accounts · Bonds · No risk</div>
+        </div>
+        <div class="bucket-check"><svg viewBox="0 0 24 24" fill="none" stroke="#0B0F1E" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg></div>
+      </button>
+      <button class="bucket-card" data-bucket="balanced">
+        <div>
+          <div class="bucket-name">Balanced</div>
+          <div class="bucket-desc">Index funds · ETFs · Long-term growth</div>
+        </div>
+        <div class="bucket-check"><svg viewBox="0 0 24 24" fill="none" stroke="#0B0F1E" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg></div>
+      </button>
+      <button class="bucket-card" data-bucket="highrisk">
+        <div>
+          <div class="bucket-name">High Risk</div>
+          <div class="bucket-desc">Crypto · Stocks · Higher upside, higher risk</div>
+        </div>
+        <div class="bucket-check"><svg viewBox="0 0 24 24" fill="none" stroke="#0B0F1E" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- HEATMAP -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <span class="section-title">Your 365 Days</span>
+      <div class="section-rule"></div>
+    </div>
+    <div class="heatmap-card">
+      <div class="heatmap-head">
+        <h3>Check-in History</h3>
+        <span id="hmCount">0 logged</span>
+      </div>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+      <div class="heatmap-legend">
+        <div class="legend-box"></div><span>Not yet</span>
+        <div class="legend-box on"></div><span>$4 moved</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MILESTONES -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <span class="section-title">Milestones</span>
+      <div class="section-rule"></div>
+    </div>
+    <div class="milestone-list" id="milestoneList"></div>
+  </div>
+
+  <!-- ACTION CHECKLIST -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <span class="section-title">One Action Per Chapter</span>
+      <div class="section-rule"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="actionProgress" style="width:0%"></div></div>
+    <div class="progress-text" id="actionProgressText">0 of 5 complete</div>
+    <div class="action-list" id="actionList" style="margin-top:16px"></div>
+  </div>
+
+  <!-- REFLECTION -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <span class="section-title">Future You</span>
+      <div class="section-rule"></div>
+    </div>
+    <span class="reflect-label">What will your $1,460 become? Write it down — future you is counting on it.</span>
+    <textarea id="reflectBox" placeholder="A vacation. Breathing room. My kid's future. Write what this is really for..."></textarea>
+  </div>
+
+  <footer>
+    <a href="https://www.amazon.com/dp/B0H3QTQ4SK" class="book-cta" target="_blank" rel="noopener">
+      Get The 4 Dollar Rule — $4.99 on Amazon
+    </a>
+    <p>The 4 Dollar Rule · Charlie Ware · Educational resource, not financial advice.</p>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const STORAGE_KEY = '4dr_tracker_v1';
+  const RING_CIRCUMFERENCE = 2 * Math.PI * 124;
+
+  const milestones = [
+    { day: 1,   amt: 4,    note: "Move your first $4. You're in." },
+    { day: 7,   amt: 28,   note: "One week down. Automation should be live." },
+    { day: 30,  amt: 120,  note: "The habit is forming. Check your account — it's real." },
+    { day: 90,  amt: 360,  note: "Three months. This is where habits stick or break." },
+    { day: 180, amt: 720,  note: "Halfway. Future you is starting to feel it." },
+    { day: 365, amt: 1460, note: "One year. One full lap. You did it." },
+  ];
+
+  const actions = [
+    { ch: "Chapter 1", text: "Find one $4 transaction from your last 7 days of spending." },
+    { ch: "Chapter 2", text: "Write down one thing you own vs. one thing you consumed this week." },
+    { ch: "Chapter 3", text: "Decide which bucket you're starting with — Safe, Balanced, or High Risk." },
+    { ch: "Chapter 4", text: "Set up your automatic transfer — $4 a day or $28 a week." },
+    { ch: "Chapter 5", text: "Write down what future you is building this for." },
+  ];
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return { checkins: [], bucket: null, actionsDone: [], reflection: '', streak:0, best:0 };
+  }
+
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  let state = loadState();
+  if(!state.checkins) state.checkins = [];
+  if(!state.actionsDone) state.actionsDone = [];
+
+  const todayStr = () => new Date().toISOString().slice(0,10);
+
+  function calcStreaks(){
+    const dates = [...state.checkins].sort();
+    if(dates.length===0) return {current:0, best:0};
+    let best=1, run=1;
+    for(let i=1;i<dates.length;i++){
+      const prev = new Date(dates[i-1]);
+      const cur = new Date(dates[i]);
+      const diff = (cur-prev)/86400000;
+      if(diff===1){ run++; } else if(diff>1){ run=1; }
+      if(run>best) best=run;
+    }
+    // current streak: walk back from today/yesterday
+    const set = new Set(dates);
+    let cur = 0;
+    let d = new Date();
+    // if today not checked in, see if yesterday continues
+    if(!set.has(todayStr())){
+      d.setDate(d.getDate()-1);
+    }
+    while(set.has(d.toISOString().slice(0,10))){
+      cur++;
+      d.setDate(d.getDate()-1);
+    }
+    return {current:cur, best:Math.max(best,cur)};
+  }
+
+  function render(){
+    const total = state.checkins.length;
+    const amount = total*4;
+    const pct = Math.min(total/365, 1);
+    const offset = RING_CIRCUMFERENCE * (1-pct);
+
+    document.getElementById('totalAmount').textContent = '$'+amount.toLocaleString();
+    document.getElementById('ringDays').textContent = total+' of 365 days';
+    document.getElementById('ringFg').setAttribute('stroke-dashoffset', offset.toFixed(1));
+
+    const streaks = calcStreaks();
+    document.getElementById('statStreak').textContent = streaks.current;
+    document.getElementById('statBest').textContent = streaks.best;
+    document.getElementById('statTotal').textContent = total;
+
+    const doneToday = state.checkins.includes(todayStr());
+    const btn = document.getElementById('checkinBtn');
+    const sub = document.getElementById('checkinSub');
+    btn.disabled = doneToday;
+    btn.textContent = doneToday ? "Today's $4 — Logged" : "Mark Today's $4";
+    sub.textContent = doneToday ? "Come back tomorrow to keep the streak alive." : "Tap to log today's move";
+
+    renderBuckets();
+    renderHeatmap();
+    renderMilestones(total);
+    renderActions();
+
+    document.getElementById('reflectBox').value = state.reflection || '';
+  }
+
+  function renderBuckets(){
+    document.querySelectorAll('.bucket-card').forEach(card=>{
+      card.classList.toggle('selected', card.dataset.bucket === state.bucket);
+    });
+  }
+
+  function renderHeatmap(){
+    const grid = document.getElementById('heatmapGrid');
+    grid.innerHTML = '';
+    const set = new Set(state.checkins);
+    const today = new Date();
+    const cells = 90; // last 90 days visible
+    const start = new Date(today);
+    start.setDate(start.getDate() - (cells-1));
+    for(let i=0;i<cells;i++){
+      const d = new Date(start);
+      d.setDate(d.getDate()+i);
+      const ds = d.toISOString().slice(0,10);
+      const cell = document.createElement('div');
+      cell.className = 'hm-cell' + (set.has(ds) ? ' done' : '') + (ds===todayStr() ? ' today' : '');
+      cell.title = ds + (set.has(ds) ? ' · $4 moved' : '');
+      grid.appendChild(cell);
+    }
+    document.getElementById('hmCount').textContent = state.checkins.length + ' logged';
+  }
+
+  function renderMilestones(total){
+    const list = document.getElementById('milestoneList');
+    list.innerHTML = '';
+    milestones.forEach(m=>{
+      const hit = total >= m.day;
+      const row = document.createElement('div');
+      row.className = 'milestone';
+      row.innerHTML = `
+        <div class="ms-dot ${hit?'hit':''}"></div>
+        <div class="ms-day display">Day ${m.day}</div>
+        <div class="ms-amt display">$${m.amt.toLocaleString()}</div>
+        <div class="ms-note ${hit?'hit':''}">${m.note}</div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function renderActions(){
+    const list = document.getElementById('actionList');
+    list.innerHTML = '';
+    actions.forEach((a, i)=>{
+      const checked = state.actionsDone.includes(i);
+      const item = document.createElement('div');
+      item.className = 'action-item' + (checked?' checked':'');
+      item.innerHTML = `
+        <div class="action-checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="#0B0F1E" stroke-width="3"><path d="M4 12l5 5L20 6"/></svg></div>
+        <div><span class="action-chapter">${a.ch}</span><span class="action-text">${a.text}</span></div>
+      `;
+      item.addEventListener('click', ()=>{
+        const idx = state.actionsDone.indexOf(i);
+        if(idx>-1) state.actionsDone.splice(idx,1);
+        else state.actionsDone.push(i);
+        saveState();
+        renderActions();
+        updateActionProgress();
+      });
+      list.appendChild(item);
+    });
+    updateActionProgress();
+  }
+
+  function updateActionProgress(){
+    const pct = (state.actionsDone.length/actions.length)*100;
+    document.getElementById('actionProgress').style.width = pct+'%';
+    document.getElementById('actionProgressText').textContent = `${state.actionsDone.length} of ${actions.length} complete`;
+  }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+  }
+
+  // ── EVENTS ──
+  document.getElementById('checkinBtn').addEventListener('click', ()=>{
+    const t = todayStr();
+    if(!state.checkins.includes(t)){
+      state.checkins.push(t);
+      saveState();
+      render();
+      const total = state.checkins.length;
+      const hitMilestone = milestones.find(m=>m.day===total);
+      if(hitMilestone){
+        showToast(`Day ${hitMilestone.day} — $${hitMilestone.amt.toLocaleString()} contributed`);
+      } else {
+        showToast(`$4 logged — $${(total*4).toLocaleString()} total`);
+      }
+    }
+  });
+
+  document.getElementById('bucketGrid').addEventListener('click', (e)=>{
+    const card = e.target.closest('.bucket-card');
+    if(!card) return;
+    state.bucket = card.dataset.bucket;
+    saveState();
+    renderBuckets();
+    showToast('Bucket saved: ' + card.querySelector('.bucket-name').textContent);
+  });
+
+  let reflectTimer;
+  document.getElementById('reflectBox').addEventListener('input', (e)=>{
+    state.reflection = e.target.value;
+    clearTimeout(reflectTimer);
+    reflectTimer = setTimeout(saveState, 500);
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    if(confirm('Reset all progress? This clears your check-ins, bucket choice, and notes on this device.')){
+      state = { checkins: [], bucket: null, actionsDone: [], reflection: '' };
+      saveState();
+      render();
+      showToast('Progress reset');
+    }
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    const total = state.checkins.length;
+    const lines = [
+      'THE 4 DOLLAR RULE — Build-Along Tracker Export',
+      '================================================',
+      `Total days logged: ${total}`,
+      `Total contributed: $${(total*4).toLocaleString()}`,
+      `Bucket: ${state.bucket || 'Not yet chosen'}`,
+      `Current streak: ${calcStreaks().current} days`,
+      `Best streak: ${calcStreaks().best} days`,
+      '',
+      'Check-in dates:',
+      ...state.checkins.sort(),
+      '',
+      'Reflection — what this is for:',
+      state.reflection || '(not written yet)',
+      '',
+      'Action steps completed: ' + state.actionsDone.length + ' of ' + actions.length,
+    ];
+    const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '4-dollar-rule-progress.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('Exported');
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
