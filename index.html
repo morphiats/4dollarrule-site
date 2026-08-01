@@ -311,9 +311,8 @@
   <div class="section">
     <div class="section-head"><span class="section-num">06</span><span class="section-title">Talk About It</span><div class="section-rule"></div></div>
     <div class="comments-card">
-      <div id="disqus_thread">
-        <div class="comments-loading">Loading comments...</div>
-      </div>
+      <div id="fb-root"></div>
+      <div class="fb-comments" data-href="https://4dollarrule.xyz/" data-width="100%" data-numposts="10" data-colorscheme="dark"></div>
     </div>
   </div>
 
@@ -686,16 +685,13 @@
 </script>
 
 <script>
-  var disqus_config = function () {
-    this.page.url = window.location.href;
-    this.page.identifier = '4dollarrule-landing';
-  };
-  (function() {
-    var d = document, s = d.createElement('script');
-    s.src = 'https://YOUR-DISQUS-SHORTNAME.disqus.com/embed.js';
-    s.setAttribute('data-timestamp', +new Date());
-    (d.head || d.body).appendChild(s);
-  })();
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0&appId=1778670450003458';
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
 </script>
 
 </body>
